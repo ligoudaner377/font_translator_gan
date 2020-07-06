@@ -91,11 +91,11 @@ Some results from the test set. The first row are 6 observed style images. I cho
 
 ## Dataset
 
-Dataset used in this project is available at [here](https://drive.google.com/open?id=15kdvCaCopae5gnaEb4N-j29dCaOn6WqL "https://drive.google.com/open?id=15kdvCaCopae5gnaEb4N-j29dCaOn6WqL").
+Dataset used in this project is available at [here](https://drive.google.com/file/d/1VEReXXgUtgZxBSYTeVO-l29GLKiau_ut/view?usp=sharing "https://drive.google.com/file/d/1VEReXXgUtgZxBSYTeVO-l29GLKiau_ut/view?usp=sharing").
 
 ## How to use
 
-- Download the [dataset](https://drive.google.com/open?id=15kdvCaCopae5gnaEb4N-j29dCaOn6WqL "https://drive.google.com/open?id=15kdvCaCopae5gnaEb4N-j29dCaOn6WqL").
+- Download the [dataset](https://drive.google.com/file/d/1VEReXXgUtgZxBSYTeVO-l29GLKiau_ut/view?usp=sharing "https://drive.google.com/file/d/1VEReXXgUtgZxBSYTeVO-l29GLKiau_ut/view?usp=sharing").
 - Unzip it to ./datasets/
 - To view training results and loss plots, run `python -m visdom.server` and click the URL http://localhost:8097.
 - Train the model
