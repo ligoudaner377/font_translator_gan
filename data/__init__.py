@@ -14,7 +14,6 @@ import importlib
 import torch.utils.data
 from data.base_dataset import BaseDataset
 
-
 def find_dataset_using_name(dataset_name):
     """Import the module "data/[dataset_name]_dataset.py".
 
@@ -37,12 +36,10 @@ def find_dataset_using_name(dataset_name):
 
     return dataset
 
-
 def get_option_setter(dataset_name):
     """Return the static method <modify_commandline_options> of the dataset class."""
     dataset_class = find_dataset_using_name(dataset_name)
     return dataset_class.modify_commandline_options
-
 
 def create_dataset(opt):
     """Create a dataset given the option.
@@ -57,7 +54,6 @@ def create_dataset(opt):
     data_loader = CustomDatasetDataLoader(opt)
     dataset = data_loader.load_data()
     return dataset
-
 
 class CustomDatasetDataLoader():
     """Wrapper class of Dataset class that performs multi-threaded data loading"""
@@ -75,7 +71,7 @@ class CustomDatasetDataLoader():
         self.dataloader = torch.utils.data.DataLoader(
             self.dataset,
             batch_size=opt.batch_size,
-            shuffle=not opt.serial_batches,
+            shuffle=True,
             num_workers=int(opt.num_threads))
 
     def load_data(self):

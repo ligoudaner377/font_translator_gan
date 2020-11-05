@@ -21,7 +21,7 @@ class FontDataset(BaseDataset):
         parser.add_argument('--style_channel', type=int, default=6, help='# of style channels')
         parser.set_defaults(load_size=64, num_threads=4, display_winsize=64)
         if is_train:
-            parser.set_defaults(batch_size=512, display_freq=51200, update_html_freq=51200, print_freq=51200, save_latest_freq=512000, n_epochs=10, n_epochs_decay=10, display_ncols=10)
+            parser.set_defaults(display_freq=51200, update_html_freq=51200, print_freq=51200, save_latest_freq=5000000, n_epochs=10, n_epochs_decay=10, display_ncols=10)
         return parser
     
     def __init__(self, opt):
@@ -31,7 +31,7 @@ class FontDataset(BaseDataset):
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
         BaseDataset.__init__(self, opt)
-        self.dataroot = os.path.join(opt.dataroot, opt.phase, 'chinese_light')  # get the image directory
+        self.dataroot = os.path.join(opt.dataroot, opt.phase, 'chinese')  # get the image directory
         self.paths = sorted(make_dataset(self.dataroot, opt.max_dataset_size))  # get image paths
         self.style_channel = opt.style_channel
         self.transform = transforms.Compose([transforms.ToTensor(),
@@ -40,31 +40,30 @@ class FontDataset(BaseDataset):
         
     def __getitem__(self, index):
         # get chinese path and corresbonding english paths
-        chinese_path = self.paths[index]
-        english_paths = self.get_english_paths(chinese_path)
+        gt_path = self.paths[index]
+        parts = gt_path.split(os.sep)
+        english_paths = self.get_english_paths(parts)
+        chinese_path = self.get_chinese_path(parts)
         # load and transform images
-        gt_image, content_image = self.load_image(chinese_path)
-        style_image = [self.load_image(english_path, mode=None) for english_path in english_paths]
-        style_image = torch.cat(style_image, 0)
+        content_image = self.load_image(chinese_path)
+        gt_image = self.load_image(gt_path)
+        style_image = torch.cat([self.load_image(english_path) for english_path in english_paths], 0)
         return {'gt_images':gt_image, 'content_images':content_image, 'style_images':style_image,
-                'style_image_paths':english_paths, 'image_paths':chinese_path}
+                'style_image_paths':english_paths, 'image_paths':gt_path}
     
     def __len__(self):
         """Return the total number of images in the dataset."""
         return len(self.paths)
     
-    def load_image(self, path, mode='crop'):
+    def load_image(self, path):
         image = Image.open(path)
         image = self.transform(image)
-        if mode:
-            gt_image = image[:, :self.img_size, :]
-            content_image = image[:, self.img_size:, :]
-            return (gt_image, content_image)
-        else:
-            return image
+        return image
         
-    def get_english_paths(self, chinese_path):
-        parts = chinese_path.split(os.sep)
+    def get_english_paths(self, parts):
         english_font_path = os.path.join(parts[0], parts[1], parts[2], parts[3], 'english', parts[5])
         english_paths = [os.path.join(english_font_path, letter) for letter in random.sample(os.listdir(english_font_path), self.style_channel)]
         return english_paths
+    
+    def get_chinese_path(self, parts):
+        return os.path.join(parts[0], parts[1], parts[2], parts[3], 'source', parts[-1])

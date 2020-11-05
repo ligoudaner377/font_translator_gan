@@ -29,13 +29,13 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256):
     parts = image_path[0].split(os.sep)
     file_name = os.path.splitext(parts[-1])[0]
     parent_dir = parts[-2]
-    name = parent_dir+'_'+file_name
+    name = parent_dir+'|'+file_name
     webpage.add_header(name)
     ims, txts, links = [], [], []
 
     for label, im_data in visuals.items():
         im = util.tensor2im(im_data)
-        image_name = '%s_%s.png' % (name, label)
+        image_name = '%s|%s.png' % (name, label)
         save_path = os.path.join(image_dir, image_name)
         util.save_image(im, save_path, aspect_ratio=aspect_ratio)
         ims.append(image_name)
@@ -105,9 +105,8 @@ class Visualizer():
             save_result (bool) - - if save the current results to an HTML file
         """
         if self.display_id > 0:  # show images in the browser using visdom
-            ncols = self.ncols
+            ncols = len(visuals)
             if ncols > 0:        # show all the images in one visdom panel
-                ncols = min(ncols, len(visuals))
                 table_css = """<style>
                         table {border-collapse: separate; border-spacing: 4px; white-space: nowrap; text-align: center}
                         table td {width: % dpx; height: % dpx; padding: 4px; outline: 4px solid black}
@@ -187,7 +186,7 @@ class Visualizer():
         if not hasattr(self, 'plot_data'):
             self.plot_data = {'X': [], 'Y': [], 'legend': list(losses.keys())}
         self.plot_data['X'].append(epoch + counter_ratio)
-        self.plot_data['Y'].append([losses[k] for k in self.plot_data['legend']])
+        self.plot_data['Y'].append([losses[k] for k in self.plot_data['legend']])        
         try:
             self.vis.line(
                 X=np.stack([np.array(self.plot_data['X'])] * len(self.plot_data['legend']), 1),

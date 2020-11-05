@@ -36,9 +36,8 @@ class BaseOptions():
         parser.add_argument('--no_dropout', action='store_true', help='no dropout for the generator')
         # dataset parameters
         parser.add_argument('--dataset_mode', type=str, default='font', help='chooses how datasets are loaded.')
-        parser.add_argument('--direction', type=str, default='English2Chinese', help='only support English2Chinese now')
-        parser.add_argument('--serial_batches', action='store_true', help='if true, takes images in order to make batches, otherwise takes them randomly')
-        parser.add_argument('--num_threads', default=4, type=int, help='# threads for loading data')
+        parser.add_argument('--direction', type=str, default='english2chinese', help='only support english2chinese_light now')
+        parser.add_argument('--num_threads', default=8, type=int, help='# threads for loading data')
         parser.add_argument('--batch_size', type=int, default=1, help='input batch size')
         parser.add_argument('--load_size', type=int, default=286, help='scale images to this size')
         parser.add_argument('--max_dataset_size', type=int, default=float("inf"), help='Maximum number of samples allowed per dataset. If the dataset directory contains more than max_dataset_size, only a subset is loaded.')

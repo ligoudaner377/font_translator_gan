@@ -2,18 +2,17 @@ import torch
 from .base_model import BaseModel
 from . import networks
 
-
 class FontTranslatorGANModel(BaseModel):
-    
     @staticmethod
     def modify_commandline_options(parser, is_train=True):
         # changing the default values
-        parser.set_defaults(norm='batch', netG='mixed_9blocks', dataset_mode='font')
+        parser.set_defaults(norm='batch', netG='FTGAN_MLAN', dataset_mode='font')
         
         if is_train:
-            parser.set_defaults(pool_size=0, gan_mode='lsgan', netD='basic_64')
+            parser.set_defaults(batch_size=256, pool_size=0, gan_mode='hinge', netD='basic_64')
             parser.add_argument('--lambda_L1', type=float, default=100.0, help='weight for L1 loss')
             parser.add_argument('--dis_2', default=True, help='use two discriminators or not')
+            parser.add_argument('--use_spectral_norm', default=True)
         return parser
 
     def __init__(self, opt):
@@ -43,10 +42,10 @@ class FontTranslatorGANModel(BaseModel):
 
         if self.isTrain:  # define discriminators; conditional GANs need to take both input and output images; Therefore, #channels for D is input_nc + output_nc
             if self.dis_2:
-                self.netD_content = networks.define_D(2, opt.ndf, opt.netD, opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
-                self.netD_style = networks.define_D(self.style_channel+1, opt.ndf, opt.netD, opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
+                self.netD_content = networks.define_D(2, opt.ndf, opt.netD, opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids, use_spectral_norm=opt.use_spectral_norm)
+                self.netD_style = networks.define_D(self.style_channel+1, opt.ndf, opt.netD, opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids, use_spectral_norm=opt.use_spectral_norm)
             else:
-                self.netD = networks.define_D(self.style_channel+2, opt.ndf, opt.netD, opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
+                self.netD = networks.define_D(self.style_channel+2, opt.ndf, opt.netD, opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids, use_spectral_norm=opt.use_spectral_norm)
             
         if self.isTrain:
             # define loss functions
@@ -73,8 +72,7 @@ class FontTranslatorGANModel(BaseModel):
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
-        inputs = torch.cat((self.content_images, self.style_images), 1)
-        self.generated_images = self.netG(inputs)
+        self.generated_images = self.netG((self.content_images, self.style_images))
         
     def compute_gan_loss_D(self, real_images, fake_images, netD):
         # Fake
@@ -92,7 +90,7 @@ class FontTranslatorGANModel(BaseModel):
     def compute_gan_loss_G(self, fake_images, netD):
         fake = torch.cat(fake_images, 1)
         pred_fake = netD(fake)
-        loss_G_GAN = self.criterionGAN(pred_fake, True)
+        loss_G_GAN = self.criterionGAN(pred_fake, True, True)
         return loss_G_GAN
     
     def backward_D(self):
