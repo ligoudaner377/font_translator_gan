@@ -4,7 +4,8 @@ This is the implementation for the paper:
 
 **Few-shot Font Style Transfer between Different Languages**
 
-in Proc. of Winter Applications on Computer Vision WACV’21, Jan., 2021. (to appear)
+in Proc. of Winter Applications on Computer Vision WACV’21, Jan., 2021. 
+[Paper](https://openaccess.thecvf.com/content/WACV2021/papers/Li_Few-Shot_Font_Style_Transfer_Between_Different_Languages_WACV_2021_paper.pdf).
 
 <div  align="center">    
 <img src="images/application.png" width="600">

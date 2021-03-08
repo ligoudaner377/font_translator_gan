@@ -36,7 +36,7 @@ class BaseOptions():
         parser.add_argument('--no_dropout', action='store_true', help='no dropout for the generator')
         # dataset parameters
         parser.add_argument('--dataset_mode', type=str, default='font', help='chooses how datasets are loaded.')
-        parser.add_argument('--direction', type=str, default='english2chinese', help='only support english2chinese_light now')
+        parser.add_argument('--direction', type=str, default='english2chinese', help='define the style transfer direction, note that evaluate script does not support chinese2english mode')
         parser.add_argument('--num_threads', default=8, type=int, help='# threads for loading data')
         parser.add_argument('--batch_size', type=int, default=1, help='input batch size')
         parser.add_argument('--load_size', type=int, default=286, help='scale images to this size')

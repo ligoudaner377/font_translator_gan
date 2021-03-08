@@ -10,7 +10,7 @@ class FontTranslatorGANModel(BaseModel):
         
         if is_train:
             parser.set_defaults(batch_size=256, pool_size=0, gan_mode='hinge', netD='basic_64')
-            parser.add_argument('--lambda_L1', type=float, default=100.0, help='weight for L1 loss')
+            parser.add_argument('--lambda_L1', type=float, default=10.0, help='weight for L1 loss')
             parser.add_argument('--dis_2', default=True, help='use two discriminators or not')
             parser.add_argument('--use_spectral_norm', default=True)
         return parser
