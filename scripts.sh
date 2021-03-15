@@ -2,7 +2,7 @@ set -ex
 
 model="font_translator_gan"
 dataroot="./datasets/font"
-name="lambdal1=10"
+name="wo_gan_loss"
 dataset_mode="font"
 
 python train.py --dataroot ${dataroot} --model ${model} --dataset_mode ${dataset_mode} --name ${name} --phase train --no_dropout

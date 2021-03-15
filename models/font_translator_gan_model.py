@@ -10,7 +10,9 @@ class FontTranslatorGANModel(BaseModel):
         
         if is_train:
             parser.set_defaults(batch_size=256, pool_size=0, gan_mode='hinge', netD='basic_64')
-            parser.add_argument('--lambda_L1', type=float, default=10.0, help='weight for L1 loss')
+            parser.add_argument('--lambda_L1', type=float, default=100.0, help='weight for L1 loss')
+            parser.add_argument('--lambda_style', type=float, default=1.0, help='weight for style loss')
+            parser.add_argument('--lambda_content', type=float, default=1.0, help='weight for content loss')
             parser.add_argument('--dis_2', default=True, help='use two discriminators or not')
             parser.add_argument('--use_spectral_norm', default=True)
         return parser
@@ -49,12 +51,15 @@ class FontTranslatorGANModel(BaseModel):
             
         if self.isTrain:
             # define loss functions
+            self.lambda_L1 = opt.lambda_L1
             self.criterionGAN = networks.GANLoss(opt.gan_mode).to(self.device)
             self.criterionL1 = torch.nn.L1Loss()
             # initialize optimizers; schedulers will be automatically created by function <BaseModel.setup>.
             self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizers.append(self.optimizer_G)
             if self.dis_2:
+                self.lambda_style = opt.lambda_style
+                self.lambda_content = opt.lambda_content
                 self.optimizer_D_content = torch.optim.Adam(self.netD_content.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
                 self.optimizer_D_style = torch.optim.Adam(self.netD_style.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
                 self.optimizers.append(self.optimizer_D_content)
@@ -98,10 +103,10 @@ class FontTranslatorGANModel(BaseModel):
         if self.dis_2:
             self.loss_D_content = self.compute_gan_loss_D([self.content_images, self.gt_images],  [self.content_images, self.generated_images], self.netD_content)
             self.loss_D_style = self.compute_gan_loss_D([self.style_images, self.gt_images], [self.style_images, self.generated_images], self.netD_style)
-            self.loss_D = self.loss_D_content+self.loss_D_style            
+            self.loss_D = self.lambda_content*self.loss_D_content + self.lambda_style*self.loss_D_style         
         else:
             self.loss_D = self.compute_gan_loss_D([self.content_images, self.style_images, self.gt_images], [self.content_images, self.style_images, self.generated_images], self.netD)
-            
+
         self.loss_D.backward()
 
     def backward_G(self):
@@ -110,7 +115,7 @@ class FontTranslatorGANModel(BaseModel):
         if self.dis_2:
             self.loss_G_content = self.compute_gan_loss_G([self.content_images, self.generated_images], self.netD_content)
             self.loss_G_style = self.compute_gan_loss_G([self.style_images, self.generated_images], self.netD_style)
-            self.loss_G_GAN = self.loss_G_content+self.loss_G_style
+            self.loss_G_GAN = self.lambda_content*self.loss_G_content + self.lambda_style*self.loss_G_style
         else:
             self.loss_G_GAN = self.compute_gan_loss_G([self.content_images, self.style_images, self.generated_images], self.netD)
             
@@ -131,10 +136,10 @@ class FontTranslatorGANModel(BaseModel):
             self.optimizer_D_content.step()
             self.optimizer_D_style.step()
         else:
-            self.set_requires_grad(self.netD, True)  # enable backprop for D
+            self.set_requires_grad(self.netD, True)      # enable backprop for D
             self.optimizer_D.zero_grad()             # set D's gradients to zero
-            self.backward_D()                        # calculate gradients for D
-            self.optimizer_D.step()                  # update D's weights
+            self.backward_D()                    # calculate gradients for D
+            self.optimizer_D.step()                # update D's weights
         # update G
         if self.dis_2:
             self.set_requires_grad([self.netD_content, self.netD_style], False)
