@@ -923,7 +923,7 @@ class FTGAN_Layer_Atten(nn.Module):
         
         style_features = (style_features_1*weight.narrow(1, 0, 1)+
                           style_features_2*weight.narrow(1, 1, 1)+
-                          style_features_2*weight.narrow(1, 2, 1)).view(B, self.ngf*4, 1, 1)+torch.randn([B, self.ngf*4, 16, 16], device='cuda')*0.02
+                          style_features_3*weight.narrow(1, 2, 1)).view(B, self.ngf*4, 1, 1)+torch.randn([B, self.ngf*4, 16, 16], device='cuda')*0.02
         return style_features
     
 class FTGAN_Generator_MLAN(nn.Module):
