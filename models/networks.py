@@ -881,7 +881,7 @@ class FTGAN_Global_Atten(nn.Module):
     def forward(self, style_features, B, K):
         style_features = style_features.view(B, K, self.ngf*4)
         style_features = torch.mean(style_features, dim=1).view(B, self.ngf*4, 1, 1) # TBD
-        style_features = style_features+torch.randn([B, self.ngf*4, 16, 16], device='cuda')*0.02
+        style_features = style_features+torch.randn_like(sty_features)*0.02
         return style_features
     
 class FTGAN_Generator_HAN(nn.Module):
@@ -984,7 +984,7 @@ class Self_Attn(nn.Module):
                 attention: B X N X N (N is Width*Height)
         """
         m_batchsize,C,width ,height = x.size()
-        proj_query  = self.query_conv(x).view(m_batchsize,-1,width*height).permute(0,2,1) # B X CX(N)
+        proj_query  = self.query_conv(x).view(m_batchsize,-1,width*height).permute(0,2,1) # B X N X C
         proj_key =  self.key_conv(x).view(m_batchsize,-1,width*height) # B X C x (*W*H)
         energy =  torch.bmm(proj_query,proj_key) # transpose check
         attention = self.softmax(energy) # BX (N) X (N) 
