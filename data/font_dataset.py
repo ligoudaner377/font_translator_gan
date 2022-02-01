@@ -41,7 +41,7 @@ class FontDataset(BaseDataset):
         self.paths = sorted(make_dataset(self.dataroot, opt.max_dataset_size))  # get image paths
         self.style_channel = opt.style_channel
         self.transform = transforms.Compose([transforms.ToTensor(),
-                                             transforms.Normalize(mean = (0.5), std = (0.5))])
+                                             transforms.Normalize(mean = (0.5,), std = (0.5,))])
         self.img_size = opt.load_size
         
     def __getitem__(self, index):
